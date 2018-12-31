@@ -9,7 +9,8 @@ import java.util.Iterator;
 public class Unnamed implements Iterable<Node>{
 
     private ArrayList<Node> nodes = new ArrayList<>();
-    private static final int MINIMUM_TIME_SPACE = 99; //100ms in spacing between each node(Each node has it's own independent space of 200ms) Selecting a node will depend on 200ms of space given
+    private static final int MINIMUM_TIME_SPACE = 99; //98ms in spacing between each node(Each node has it's own independent space of 196ms) Selecting a node will depend on 50s of space given
+    private final int BINARARY_SEARCH_TIME_SPACE =MINIMUM_TIME_SPACE/2 +2; // Exists since the insertion number is 99 to make 100 a clean spacing, this filler respects the time space, and
     private int core;
     private int ID;
     private boolean isAnalog;
@@ -30,6 +31,7 @@ public class Unnamed implements Iterable<Node>{
     /**
      * A fast insertion method to permit a node to be added with O(log n)
      * A node will not be added if it overlaps within the range of 100ms of another node
+     * Pivots more specific to properly insert to the left or right of the (Low&&Max)
      * @param toAdd node to be added
      * @param low range pivot
      * @param high range pivot
@@ -38,10 +40,10 @@ public class Unnamed implements Iterable<Node>{
     {
         if(low >= high)
         {
-            isOverlapping(toAdd, low);
+            checkConflict(toAdd, low);
             if(low > 0)
             {
-                isOverlapping(toAdd, low-1);
+                checkConflict(toAdd, low-1);
             }
             if(nodes.get(low).getStartTime() > toAdd.getEndTime())
             {
@@ -52,7 +54,7 @@ public class Unnamed implements Iterable<Node>{
             {
                 if(low < nodes.size()-2)
                 {
-                    isOverlapping(toAdd, low+1);
+                    checkConflict(toAdd, low+1);
                 }
                 else
                 {
@@ -65,9 +67,9 @@ public class Unnamed implements Iterable<Node>{
         }
 
         int mid = (low + high)/2;
-        isOverlapping(toAdd, mid);
+        checkConflict(toAdd, mid);
         if(mid+1 < nodes.size()) {
-            isOverlapping(toAdd, mid + 1);
+            checkConflict(toAdd, mid + 1);
         }
 
         if(nodes.get(mid).getStartTime() - MINIMUM_TIME_SPACE > toAdd.getEndTime())
@@ -93,7 +95,7 @@ public class Unnamed implements Iterable<Node>{
             return;
         }
         int i = 0;
-        isOverlapping(toAdd, i); // throws an exception and modifies ui to show nothing happened.
+        checkConflict(toAdd, i); // throws an exception and modifies ui to show nothing happened.
         binaryInsertion(toAdd, 0, nodes.size()-1);
     }
 
@@ -102,12 +104,57 @@ public class Unnamed implements Iterable<Node>{
      * @param toAdd node to be added
      * @param i index to compare
      */
-    private void isOverlapping(Node toAdd, int i) {
+    private void checkConflict(Node toAdd, int i) {
         if(((nodes.get(i).getStartTime()-MINIMUM_TIME_SPACE < toAdd.getStartTime()) && (nodes.get(i).getEndTime() + MINIMUM_TIME_SPACE  > toAdd.getStartTime())) || ((nodes.get(i).getStartTime()-MINIMUM_TIME_SPACE < toAdd.getEndTime()) && (nodes.get(i).getEndTime() + MINIMUM_TIME_SPACE  > toAdd.getEndTime())))
         {
             System.out.println("exceppppt");
             //throw an exception to prevent adding this node, GUI will modify accordingly to notify
         }
+    }
+
+    private Node binarySearch(int time, int low, int high)
+    {
+        if(nodes.isEmpty())
+        {
+            return null;
+        }
+        if(nodes.size() == 1)
+        {
+            if((nodes.get(0).getStartTime() - BINARARY_SEARCH_TIME_SPACE < time)  && (nodes.get(0).getEndTime() + BINARARY_SEARCH_TIME_SPACE > time))
+            {
+                return nodes.get(0);
+            }
+            return null;//Practically else
+        }
+        //Since every node with a time value is unique through a range of
+        if(low == high)
+        {
+            if((nodes.get(low).getStartTime() - BINARARY_SEARCH_TIME_SPACE < time)  && (nodes.get(low).getEndTime() + BINARARY_SEARCH_TIME_SPACE > time))
+            {
+                return nodes.get(low);
+            }
+                return null;//Practically else
+        }
+        int mid = (low + high)/2;
+        if((nodes.get(mid).getStartTime() - BINARARY_SEARCH_TIME_SPACE < time)  && (nodes.get(mid).getEndTime() + BINARARY_SEARCH_TIME_SPACE > time))
+        {
+            return nodes.get(mid);
+        }
+        else if((nodes.get(mid).getStartTime() - BINARARY_SEARCH_TIME_SPACE > time))
+        {
+            return binarySearch(time, low, mid);
+        }
+        else if((nodes.get(mid).getEndTime() + BINARARY_SEARCH_TIME_SPACE < time))
+        {
+            return binarySearch(time, mid+1, high);
+        }
+        return null;
+    }
+
+    public Node getSelection(int time)
+    {
+        //Named for readability for UI calls
+        return binarySearch(time, 0, nodes.size()-1);//will return null, if UI reads NULL, an exception my be thrown to modify UI in lower functions, OR simply use == null conditional to modify
     }
 
     /**

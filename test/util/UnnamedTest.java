@@ -62,4 +62,25 @@ public class UnnamedTest {
         }
         System.out.println("count: " + count);
     }
+
+    @Test
+    public void testBinarySearch()
+    {
+        System.out.println();
+        int x = 1000000;
+        //+100 because there is an overlapping error within 1 element in the middle due to the range provided by bounce back[due to 0 being the initial multiplier]. (Would throw an exception generally)
+        for(int i = 0; (i*100)+100 <= x; i++)
+        {
+            if(i%2 == 1)
+            {
+                ana.createNode(x-(((i/2)+1)*100), 255, true);
+            }
+            else
+            {
+                ana.createNode(((i/2))*100, 255, true);
+            }
+        }
+        //There's an error range of 1-2 near the index of Nodes bunched together, by 1-2 MS (Not a big deal?)
+        System.out.println(ana.getSelection(20498).getStartTime());
+    }
 }

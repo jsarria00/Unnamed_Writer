@@ -85,7 +85,6 @@ public class UnnamedApplication implements Runnable {
        isPlaying = player.isPlaying();
     }
 
-
     /**
      * Endlessly feeds the Application thread to get a new set of instructions via String input.
      */
